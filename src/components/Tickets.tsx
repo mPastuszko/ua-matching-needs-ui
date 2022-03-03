@@ -3,11 +3,11 @@ import { useQuery } from "react-query"
 import axios from "axios"
 import { RouteDefinitions } from "../utils/routes"
 import { isTicketActive } from "../../pages/ticket/[id]"
-import { TICKET_STATUS } from "../../pages/tickets/add"
 import { getUserInfo } from "../services/auth"
 import { Tag } from "./Tag"
 import { TagsFilter } from "./TagsFilter"
 import { Tooltip } from "@chakra-ui/react"
+import { TICKET_STATUS } from "../utils/ticket-types"
 
 const isMineTicket = (item, userInfo) => {
   if (!userInfo) {

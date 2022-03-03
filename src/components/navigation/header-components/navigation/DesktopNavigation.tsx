@@ -33,6 +33,10 @@ const DesktopNavigationElement = ({ route }: DesktopNavigationElementProps) => {
   const { locale, asPath } = useRouter()
 
   const isActive = useMemo(() => asPath === route, [asPath, route])
+  console.log("isActive :>>", isActive)
+  console.log("asPath :>>", asPath)
+  console.log("route :>>", route)
+  console.log("----")
   const label = useMemo(
     () => getRouteNameForLocale(route, locale as Locale),
     [route, locale]

@@ -1,11 +1,9 @@
 import {
   Box,
-  Button,
+  Checkbox,
   Container,
   Heading,
-  Input,
   Stack,
-  Tag,
   Text,
   Textarea,
 } from "@chakra-ui/react"
@@ -19,119 +17,24 @@ import { RouteDefinitions } from "../../src/utils/routes"
 import { toast } from "react-toastify"
 import dayjs from "dayjs"
 import { useTranslations } from "../../src/hooks/translations"
-import { isTicketActive } from "../ticket/[id]"
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { AddTicketButton } from "../../src/components/AddTicketButton"
 import { getMainTags } from "../../src/utils/tags"
-
-export const LOCAL_STORAGE_KEY_TICKET_DATA = "ticket_data"
-export const LOCAL_STORAGE_KEY_ALL_TICKETS = "all_tickets"
-export const LOCAL_STORAGE_KEY_TAGS = "tags"
-
-export type NeedTagType = {
-  id: number
-  name: string
-}
-
-export type TicketFormData = {
-  what?: string
-  count?: number
-  where?: string
-  who?: string
-}
-
-export type TicketPostData = TicketFormData & {
-  phone: string
-  need_tag_id: {
-    need_tag_id: Partial<NeedTagType>
-  }[]
-}
-
-export enum TICKET_STATUS {
-  ACTIVE = "ACTIVE",
-  SOLVED = "SOLVED",
-  EXPIRED = "EXPIRED",
-  DELETED = "DELETED",
-  CANCELED = "CANCELED",
-  HIDDEN = "HIDDEN",
-}
-
-export type Organization = {
-  id: number
-  name: string
-}
-
-export type TicketData = TicketFormData & {
-  id: number
-  // @deprecated - use expirationTimestampSane instead
-  expirationTimestamp: number
-  expirationTimestampSane: string
-  date_created: number
-  ticket_status: TICKET_STATUS
-  organization_id?: Organization
-  description: string
-  need_tag_id: {
-    need_tag_id: NeedTagType
-  }[]
-  visits: number
-}
-
-export type TicketDetails = TicketPostData & TicketData
-
-const saveForFurtherUsage = (data: TicketFormData, tagsSelected: number[]) => {
-  localStorage.setItem(LOCAL_STORAGE_KEY_TICKET_DATA, JSON.stringify(data))
-  localStorage.setItem(LOCAL_STORAGE_KEY_TAGS, JSON.stringify(tagsSelected))
-}
-
-const getInitialDataFromLocalStorage = () => {
-  if (typeof window === "undefined") {
-    return
-  }
-
-  const data = localStorage.getItem(LOCAL_STORAGE_KEY_TICKET_DATA)
-
-  if (data) {
-    return JSON.parse(data)
-  }
-}
-
-const TagsChooseForm = (props: {
-  tags: NeedTagType[]
-  tagsSelected: number[]
-  onClickTag: (tagId: number) => void
-}) => (
-  <Box>
-    {props.tags.map((tag) => (
-      <Tag
-        key={tag.id}
-        mr={2}
-        mb={2}
-        variant={props.tagsSelected.includes(tag.id) ? "solid" : "outline"}
-        onClick={() => props.onClickTag(tag.id)}
-        className={"cursor-pointer "}
-        colorScheme={"blue"}
-      >
-        {tag.name}
-      </Tag>
-    ))}
-  </Box>
-)
-
-const getPreviouslySavedTags = () => {
-  if (typeof window !== "undefined") {
-    const json = localStorage.getItem(LOCAL_STORAGE_KEY_TAGS)
-    if (json) {
-      return JSON.parse(json)
-    }
-  }
-
-  return []
-}
+import { TicketFormData, TicketPostData } from "../../src/utils/ticket-types"
+import { TagsChooseForm } from "../../src/components/TagsChooseForm"
+import {
+  getInitialDataFromLocalStorage,
+  getPreviouslySavedTags,
+  saveForFurtherUsage,
+} from "../../src/utils/add-ticket"
+import { AddingTicketResult } from "../../src/components/AddingTicketResult"
 
 const AddTicket: NextPage = () => {
+  console.debug("render AddTicket")
   const router = useRouter()
   const translations = useTranslations()
-  const previouslySavedTags = getPreviouslySavedTags()
+
+  const previouslySavedTags = useCallback(() => getPreviouslySavedTags(), [])
   const [tagsSelected, setTagsSelected] =
     useState<number[]>(previouslySavedTags)
 
@@ -140,6 +43,7 @@ const AddTicket: NextPage = () => {
   })
 
   const onSuccess = (rawResponse) => {
+    console.log("onSuccess !!")
     const { data } = rawResponse.data
     const id = data.id
 
@@ -154,7 +58,8 @@ const AddTicket: NextPage = () => {
 
   const addTicketMutation = useMutation<TicketPostData, Error, TicketPostData>(
     (newTicket) => {
-      const { phone, what, where, who, count, need_tag_id } = newTicket
+      const { phone, what, where, who, count, need_tag_id, phone_public } =
+        newTicket
       const now = new Date()
       // @deprecated
       const expirationTimestamp = now.setHours(now.getHours() + 3)
@@ -166,11 +71,11 @@ const AddTicket: NextPage = () => {
         what,
         where,
         who,
+        phone_public,
         count: count ? count : 0,
         // @deprecated
         expirationTimestamp,
         expirationTimestampSane,
-        phone_public: true,
         need_tag_id,
       }
 
@@ -184,7 +89,11 @@ const AddTicket: NextPage = () => {
     }
   )
 
-  const savedTicketFormData = getInitialDataFromLocalStorage()
+  const savedTicketFormData = useCallback(
+    () => getInitialDataFromLocalStorage(),
+    []
+  )
+
   const useFormOptions: any = {}
 
   if (savedTicketFormData) {
@@ -288,20 +197,16 @@ const AddTicket: NextPage = () => {
                 variant={"outline"}
                 {...register("who")}
               />
+              <Checkbox
+                value={1}
+                defaultChecked={true}
+                {...register("phone_public")}
+              >
+                Pokaż mój numer telefonu publicznie
+              </Checkbox>
             </Stack>
 
-            {addTicketMutation.isError ? (
-              <Text color={"red"}>
-                {translations["errors"]["error-occured-while-adding"]}
-                {addTicketMutation.error.message}
-              </Text>
-            ) : null}
-
-            {addTicketMutation.isSuccess ? (
-              <Text>
-                {translations["pages"]["add-ticket"]["request-added"]}
-              </Text>
-            ) : null}
+            <AddingTicketResult />
 
             <Box
               as="button"

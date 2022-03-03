@@ -20,6 +20,9 @@ const MainPage: NextPage = () => {
   const finalLocale = useFinalLocale()
   const pageTranslations = translations[finalLocale]["pages"]["main"]
 
+  const fontSizeBreakpoint = useBreakpointValue({ base: "md", md: "lg" })
+  console.log("fontSizeBreakpoint :>>", fontSizeBreakpoint)
+
   return (
     <div className="bg-white shadow rounded-lg max-w-2xl mx-auto">
       <Box as="section" bg="bg-surface">
@@ -40,7 +43,7 @@ const MainPage: NextPage = () => {
                 color="muted"
                 maxW="2xl"
                 textAlign="center"
-                fontSize={useBreakpointValue({ base: "md", md: "lg" })}
+                fontSize={fontSizeBreakpoint}
                 textColor="gray.600"
               >
                 {pageTranslations.description}

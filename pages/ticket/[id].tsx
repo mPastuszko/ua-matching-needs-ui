@@ -2,7 +2,6 @@ import { Tooltip, Text, Stack, Tag, Link } from "@chakra-ui/react"
 import type { NextPage } from "next"
 import { useRouter } from "next/router"
 import truncate from "truncate"
-import { TICKET_STATUS, TicketDetails } from "../tickets/add"
 import NextError from "next/error"
 import { getUserInfo } from "../../src/services/auth"
 import { toast } from "react-toastify"
@@ -23,6 +22,7 @@ import { metaData } from "../../src/utils/meta-data"
 import { translations } from "../../src/utils/translations"
 import { useFinalLocale } from "../../src/hooks/final-locale"
 import dayjs from "dayjs"
+import { TICKET_STATUS, TicketDetails } from "../../src/utils/ticket-types"
 
 const LOCAL_STORAGE_KEY_VISITS_COUNTER = "visits-counter"
 const TICKET_MARKED_AS_VISITED = "visited"
@@ -573,7 +573,7 @@ const TicketDetails: NextPage<{ ticket: TicketDetails }> = ({ ticket }) => {
         )}
 
         <div className="block bg-gray-50 text-sm font-medium text-gray-500 text-center px-4 py-4 hover:text-gray-700 sm:rounded-b-lg">
-          {isTicketActive(ticket) && (
+          {isTicketActive(ticket) && ticket.phone_public && (
             <>
               <a
                 href={`tel:${ticket.phone}`}
