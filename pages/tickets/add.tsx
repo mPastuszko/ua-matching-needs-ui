@@ -32,7 +32,10 @@ import {
 export const LOCAL_STORAGE_KEY_TICKET_DATA = "ticket_data"
 export const LOCAL_STORAGE_KEY_TAGS = "tags"
 
-const saveForFurtherUsage = (data: TicketFormData, tagsSelected: number[]) => {
+const saveNeedInfoToLocalStorage = (
+  data: TicketFormData,
+  tagsSelected: number[]
+) => {
   localStorage.setItem(LOCAL_STORAGE_KEY_TICKET_DATA, JSON.stringify(data))
   localStorage.setItem(LOCAL_STORAGE_KEY_TAGS, JSON.stringify(tagsSelected))
 }
@@ -196,7 +199,7 @@ const AddTicket: NextPage = () => {
       return router.push(RouteDefinitions.SignIn)
     }
 
-    saveForFurtherUsage(data, tagsSelected)
+    saveNeedInfoToLocalStorage(data, tagsSelected)
 
     const tagsData = tagsSelected.map((tag) => {
       return { need_tag_id: { id: tag } }

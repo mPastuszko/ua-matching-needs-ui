@@ -41,7 +41,7 @@ export class TicketService {
     return data
   }
 
-  public async getTicketDataFromEndpoint(
+  public async ticketWithNestedData(
     id: number
   ): Promise<TicketDetailsType | null> {
     const url = `/items/need/${id}?fields=*.*.*`
