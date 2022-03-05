@@ -1,4 +1,4 @@
-import { TicketDetailsType, TICKET_STATUS } from "./ticket.type"
+import { TICKET_STATUS, TicketDetailsType, NeedTagType } from "./ticket.type"
 import axios, { AxiosRequestConfig, AxiosInstance } from "axios"
 
 export function directusApiInstance(): AxiosInstance {
@@ -58,5 +58,17 @@ export class TicketService {
       }
       throw new Error(e.message)
     }
+  }
+
+  public async mainTags(): Promise<NeedTagType[]> {
+    const response = await this.api.get(
+      `/items/need_tag?filter[main_category][_eq]=1&fields=*.*.*`
+    )
+    return response.data.data
+  }
+
+  public async allTags(): Promise<NeedTagType[]> {
+    const response = await this.api.get(`/items/need_tag?fields=*.*.*`)
+    return response.data.data
   }
 }
