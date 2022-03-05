@@ -71,4 +71,9 @@ export class TicketService {
     const response = await this.api.get(`/items/need_tag?fields=*.*.*`)
     return response.data.data
   }
+
+  public async locationTags(): Promise<NeedTagType[]> {
+    const response = await this.api.get(`/items/location_hub`)
+    return response.data.data
+  }
 }

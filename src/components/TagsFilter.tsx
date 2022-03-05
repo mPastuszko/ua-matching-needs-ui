@@ -1,5 +1,4 @@
 import { useQuery } from "react-query"
-import { getMainTags } from "../utils/tags"
 import { Tag } from "./Tag"
 import { VoidFunctionComponent } from "react"
 import { getRootContainer } from "../services/_root-container"
@@ -16,7 +15,7 @@ export const TagsFilter: VoidFunctionComponent<TagsFilterProps> = ({
   onChangeTag,
 }) => {
   const { data: tags } = useQuery(`main-tags`, () => {
-    return ticketService
+    return ticketService.mainTags()
   })
   if (!tags) return null
   console.log(tags)

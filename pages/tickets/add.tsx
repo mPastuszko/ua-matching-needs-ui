@@ -28,6 +28,7 @@ import {
   TicketFormData,
   NeedTagType,
 } from "../../src/services/ticket.type"
+import { useTagTranslation } from "../../src/hooks/useTagTranslation"
 
 export const LOCAL_STORAGE_KEY_TICKET_DATA = "ticket_data"
 export const LOCAL_STORAGE_KEY_TAGS = "tags"
@@ -50,28 +51,6 @@ const getInitialDataFromLocalStorage = () => {
   if (isJsonString(data)) {
     return JSON.parse(data)
   }
-}
-
-export const useTagTranslation = () => {
-  const { locale } = useRouter()
-
-  const getTranslation = (tag: NeedTagType) => {
-    if (!locale) {
-      return tag.name
-    }
-
-    const localeForDirectus = locale.replace("-", "_")
-    const translationField = `translation_${localeForDirectus}`
-
-    const translation = tag[translationField]
-    if (translation && translation.length > 0) {
-      return translation
-    }
-
-    return tag.name
-  }
-
-  return { getTranslation }
 }
 
 const TagsChooseForm = (props: {
