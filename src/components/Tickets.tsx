@@ -10,7 +10,9 @@ import { TICKET_STATUS } from "../services/ticket.type"
 import { Tag } from "./Tag"
 import { FiltersDesktop, FiltersMobile } from "./Filters"
 import { getRootContainer } from "../services/_root-container"
+
 const ts = getRootContainer().containers.ticketService
+
 export const Tickets = ({
   mineOnly,
   ticketStatus,

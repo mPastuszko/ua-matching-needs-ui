@@ -1,13 +1,5 @@
 import {
-  Box,
-  Checkbox,
   Container,
-  Heading,
-  Input,
-  Stack,
-  Tag,
-  Text,
-  Textarea,
 } from "@chakra-ui/react"
 import type { NextPage } from "next"
 import { useForm } from "react-hook-form"
@@ -18,17 +10,16 @@ import { RouteDefinitions } from "../../src/utils/routes"
 import { toast } from "react-toastify"
 import dayjs from "dayjs"
 import { useTranslations } from "../../src/hooks/translations"
-import { useState } from "react"
-import { PlusSVG } from "../../src/assets/styled-svgs/plus"
+import { useMemo, useState } from "react"
 import { isJsonString } from "../../src/utils/local-storage"
 import { useSession } from "next-auth/react"
 import {
   TicketPostData,
   TicketFormData,
-  NeedTagType,
 } from "../../src/services/ticket.type"
-import { useTagTranslation } from "../../src/hooks/useTagTranslation"
 import { getRootContainer } from "../../src/services/_root-container"
+import { AddNeedMobile } from "../../src/components/forms/AddNeedMobile"
+import { AddNeedDesktop } from "../../src/components/forms/AddNeedDesktop"
 
 export const LOCAL_STORAGE_KEY_TICKET_DATA = "ticket_data"
 export const LOCAL_STORAGE_KEY_TAGS = "tags"
@@ -51,42 +42,6 @@ const getInitialDataFromLocalStorage = () => {
   if (isJsonString(data)) {
     return JSON.parse(data)
   }
-}
-
-const TagsChooseForm = (props: {
-  tags: NeedTagType[]
-  tagsSelected: number[] | number | undefined
-  onClickTag: (tagId: number) => void
-}) => {
-  const { getTranslation } = useTagTranslation()
-
-  function isTagIdSelected(tagId: number): boolean {
-    if (props.tagsSelected === tagId) return true
-    if (props.tagsSelected && typeof props.tagsSelected !== "number") {
-      return props.tagsSelected && props.tagsSelected.includes(tagId)
-    }
-    return false
-  }
-
-  return (
-    <Box>
-      {props.tags.map((tag) => {
-        return (
-          <Tag
-            key={tag.id}
-            mr={2}
-            mb={2}
-            variant={isTagIdSelected(tag.id) ? "solid" : "outline"}
-            onClick={() => props.onClickTag(tag.id)}
-            className={"cursor-pointer "}
-            colorScheme={"blue"}
-          >
-            {getTranslation(tag)}
-          </Tag>
-        )
-      })}
-    </Box>
-  )
 }
 
 const getPreviouslySavedTags = () => {
@@ -116,9 +71,16 @@ const AddTicket: NextPage = () => {
   const { data: tags } = useQuery(`main-tags`, () => {
     return ticketService.mainTags()
   })
-  const { data: locationTags } = useQuery(`location-tags`, () => {
+  const { data: locationTags = []} = useQuery(`location-tags`, () => {
     return ticketService.locationTags()
   })
+
+  const mappedLocationTags = useMemo(() => {
+    return locationTags.map((tag) => ({
+      value: tag.id,
+      label: tag.name,
+    }))
+  }, [locationTags])
 
   const onSuccess = (rawResponse) => {
     const { data } = rawResponse.data
@@ -135,6 +97,7 @@ const AddTicket: NextPage = () => {
 
   const addTicketMutation = useMutation<TicketPostData, Error, TicketPostData>(
     (newTicket) => {
+      console.log('new ticket', newTicket)
       const {
         phone,
         what,
@@ -178,7 +141,8 @@ const AddTicket: NextPage = () => {
         })
       }
 
-      return axios.post(`/api/add-ticket`, newTicketData)
+      console.log(newTicketData)
+      // return axios.post(`/api/add-ticket`, newTicketData)
     },
     {
       onSuccess,
@@ -215,7 +179,7 @@ const AddTicket: NextPage = () => {
     addTicketMutation.mutate(postData)
   }
 
-  const toggleTag = (tagId: number) => {
+  const toggleTypeTag = (tagId: number) => {
     if (tagsSelected.includes(tagId)) {
       setTagsSelected(tagsSelected.filter((id) => id !== tagId))
     } else {
@@ -227,160 +191,33 @@ const AddTicket: NextPage = () => {
     <div className="bg-white shadow rounded-lg max-w-2xl mx-auto">
       <Container className="px-4 py-5 sm:p-6">
         <form onSubmit={handleSubmit(submitNeed)}>
-          <Stack>
-            <Heading as="h3" size="xl">
-              {translations["pages"]["add-ticket"]["add-need"]}
-            </Heading>
 
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {translations["pages"]["add-ticket"]["tags"]}
-              </Heading>
+          <AddNeedMobile
+            typeTags={tags}
+            toggleTypeTag={toggleTypeTag}
+            selectedTypeTags={tagsSelected}
 
-              <TagsChooseForm
-                tags={tags || []}
-                onClickTag={toggleTag}
-                tagsSelected={tagsSelected}
-              />
-            </Stack>
+            locationTags={mappedLocationTags}
+            setWhereToTag={setWhereToTag}
+            setWhereFromTag={setWhereFromTag}
 
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {translations["pages"]["add-ticket"]["adults"]}
-              </Heading>
-              <Input
-                min={0}
-                type={"number"}
-                placeholder={translations["pages"]["add-ticket"]["adults-hint"]}
-                variant={"outline"}
-                {...register("adults")}
-              />
-            </Stack>
+            addTicketMutation={addTicketMutation}
+            register={register}
+          />
 
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {translations["pages"]["add-ticket"].whereFrom}
-              </Heading>
-              <TagsChooseForm
-                tags={locationTags || []}
-                onClickTag={(id) => setWhereFromTag(id)}
-                tagsSelected={whereFromTag}
-              />
-            </Stack>
+          <AddNeedDesktop
+            typeTags={tags}
+            toggleTypeTag={toggleTypeTag}
+            selectedTypeTags={tagsSelected}
 
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {translations["pages"]["add-ticket"].whereTo}
-              </Heading>
-              <TagsChooseForm
-                tags={locationTags || []}
-                onClickTag={(id) => setWhereToTag(id)}
-                tagsSelected={whereToTag}
-              />
-            </Stack>
+            locationTags={mappedLocationTags}
+            setWhereToTag={setWhereToTag}
+            setWhereFromTag={setWhereFromTag}
 
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {translations["pages"]["add-ticket"]["children"]}
-              </Heading>
-              <Input
-                min={0}
-                type={"number"}
-                placeholder={
-                  translations["pages"]["add-ticket"]["children-hint"]
-                }
-                variant={"outline"}
-                {...register("children")}
-              />
-            </Stack>
+            addTicketMutation={addTicketMutation}
+            register={register}
+          />
 
-            <Checkbox
-              value={1}
-              defaultChecked={false}
-              {...register("has_pets")}
-            >
-              {translations["pages"]["add-ticket"]["has-pets"]}
-            </Checkbox>
-
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {translations["pages"]["add-ticket"]["what-do-you-need"]}
-              </Heading>
-              <Textarea
-                rows={6}
-                placeholder={
-                  translations["pages"]["add-ticket"]["what-do-you-need-hint"]
-                }
-                variant={"outline"}
-                {...register("what")}
-              />
-            </Stack>
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {
-                  translations["pages"]["add-ticket"][
-                    "where-do-you-need-it-delivered"
-                  ]
-                }
-              </Heading>
-              <Textarea
-                placeholder={
-                  translations["pages"]["add-ticket"]["address-or-gps"]
-                }
-                variant={"outline"}
-                {...register("where")}
-              />
-            </Stack>
-            <Stack>
-              <Heading as={"h2"} size={"l"}>
-                {translations["pages"]["add-ticket"]["who-needs-it"]}
-              </Heading>
-              <Text fontSize={"sm"}>
-                {
-                  translations["pages"]["add-ticket"][
-                    "name-surname-or-org-name"
-                  ]
-                }
-              </Text>
-              <Textarea
-                placeholder={
-                  translations["pages"]["add-ticket"]["who-needs-it"]
-                }
-                variant={"outline"}
-                {...register("who")}
-              />
-            </Stack>
-
-            {addTicketMutation.isError ? (
-              <Text color={"red"}>
-                {translations["errors"]["error-occured-while-adding"]}
-                {addTicketMutation.error.message}
-              </Text>
-            ) : null}
-
-            {addTicketMutation.isSuccess ? (
-              <Text>
-                {translations["pages"]["add-ticket"]["request-added"]}
-              </Text>
-            ) : null}
-
-            <Checkbox
-              value={1}
-              defaultChecked={true}
-              {...register("phone_public")}
-            >
-              {translations["pages"]["add-ticket"].show_phone_public}
-            </Checkbox>
-
-            <button
-              type="submit"
-              disabled={addTicketMutation.isLoading}
-              className="w-full relative inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-black bg-amber-300 shadow-sm hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <PlusSVG />
-              <span>{translations["/tickets/add"]}</span>
-            </button>
-          </Stack>
         </form>
       </Container>
     </div>

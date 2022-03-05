@@ -107,10 +107,13 @@ const PL = {
     "add-ticket": {
       "add-need": "Dodaj potrzebę",
       adults: "Dorosłych",
-      "adults-hint": "Liczba osób > 12 lat",
+      adultsHint: "Liczba osób",
+      adultsAge: "> 12 lat",
       children: "Dzieci",
+      childrenHint: "Liczba dzieci",
+      childrenAge: "< 12 lat",
+      chooseLocation: "Wybierz miejsce",
       "has-pets": "Zwierzęta",
-      "children-hint": "Liczba osób < 12 lat",
       "what-do-you-need": "Opis potrzeby",
       "what-do-you-need-hint":
         "Na przykład: Materac 2-osobowy dla mamy z dzieckiem. Dlaczego i jak pilnie jest potrzebne: miałyśmy przyjąć uchodźców (mamę z dzieckiem) do naszego domu, ale ostatecznnie teraz gościmy już babcię, 3 mamy i 2 dzieci. Nie mamy gdzie ich położyć. Dodatkowe informacje: Nie mamy transportu. Prośba o przywiezienie do nas.",
@@ -319,10 +322,13 @@ const UA: Translation = {
     "add-ticket": {
       "add-need": "Додай потребу",
       adults: "Дорислих",
-      "adults-hint": "Дорослих більш ніж 12 років",
+      adultsHint: "Кількість дорослих",
+      adultsAge: "понад 12 років",
       children: "Діти",
+      childrenHint: "Кількість дітей",
+      childrenAge: "до 12 років",
+      chooseLocation: "Виберіть місце",
       "has-pets": "Тварини",
-      "children-hint": "Дітей менш ніж 12 років",
       "what-do-you-need": "Що за потреба?",
       "what-do-you-need-hint":
         "Наприклад: 2-місний матрац для матері з дитиною. Навіщо і як терміново це потрібн:  ми хочемо прийняти маму і дитину додому, але вийшло що ми приймаємо бабусю, 3 матерів і 2 дітей. Нам їх нікуди подіти. Додаткова інформація: транспорту у нас немає. Прохання привести до нас",
